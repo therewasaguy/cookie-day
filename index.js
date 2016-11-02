@@ -3,6 +3,9 @@ var express = require('express');
 var hbs = require('express-handlebars');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var mongoose = require('mongoose');
 
 // load .env
 require('dotenv').config();
@@ -11,6 +14,9 @@ require('dotenv').config();
 var app = express();
 var PORT = process.env.PORT || 8081;
 
+// setup cookieParser and bodyParser middleware
+// before our routes that depend on them
+app.use(cookieParser());
 
 // set cookieSecret in .env
 app.use(session({
@@ -19,6 +25,8 @@ app.use(session({
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
     },
+    resave: false,
+    saveUninitialized: true,
     // add session store
     store: new MongoStore({
       url: process.env.DB_URL
@@ -36,6 +44,18 @@ app.use(function(req, res, next) {
 // init handlebars
 app.engine('handlebars', hbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
+
+// add form fields to req.body, i.e. req.body.username
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// connect to database
+mongoose.connect(process.env.DB_URL);
+
+var options = {};
+var auth = require('./lib/auth')(app, options);
+auth.init(); // setup middleware
+auth.registerRoutes();
 
 // home page
 app.get('/', function(req, res) {

@@ -17,6 +17,17 @@
   <div class="ui middle aligned center aligned grid">
     <div class="ui fixed inverted main menu">
       <h1 class="item header"><a href="/">Trick or Treat?</a></h1>
+
+      <div class="right menu">
+        {{#if user}}
+          <span class="item">{{user.username}}</span>
+          <a href="/logout" class="item">Logout</a>
+        {{else}}
+          <a href="/signup" class="item">Signup</a>
+          <a href="/login" class="item">Login</a>
+        {{/if}}
+      </div>
+
     </div>
     <div class="row">
       <div class="column">
