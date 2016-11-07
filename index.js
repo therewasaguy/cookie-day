@@ -59,14 +59,28 @@ auth.registerRoutes();
 
 // home page
 app.get('/', function(req, res) {
-  if (req.session.treat) {
+  if (req.user) {
+    console.log(req.user);
    return res.render('view', {
-     msg: 'You have a treat: ' + req.session.treat
+     msg: req.user.treats
    }); 
   }
   return res.render('view', {
     msg: 'No treats.'
   });
+});
+
+app.post('/candy', function(req, res) {
+  var User = require('./models/user');
+  User.findByIdAndUpdate(req.user._id, {$push: {treats: req.body.treat}}, function(err, user) {
+    if (err) {
+      return res.status('500').json({
+        status: 'error'
+      });
+    }
+    return res.json(user.treats);
+  });
+
 });
 
 app.get('/treat', function(req, res) {
