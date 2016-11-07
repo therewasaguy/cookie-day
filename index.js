@@ -59,40 +59,44 @@ auth.registerRoutes();
 
 // home page
 app.get('/', function(req, res) {
-  if (req.session.treat) {
+  if (req.user) {
    return res.render('view', {
-     msg: 'You have a treat: ' + req.session.treat
+     treats: req.user.treats.join(', ')
    }); 
   }
   return res.render('view', {
-    msg: 'No treats.'
+    treats: 'No treats.'
   });
 });
 
-app.get('/treat', function(req, res) {
-  req.session.treat = 'candy corn';
-  req.session.flash = {
-    type: 'positive',
-    header: 'You got a treat',
-    body: 'The treat is ' + req.session.treat
-  };
-//  req.cookie('treat', 'candy corn', {
-//    httpOnly: true,
-//    signed: true
-//  });
-  res.redirect('/');
+app.post('/treat', function(req, res) {
+  var dbQuery = {$push: {treats: req.body.treat}};
+  User.findByIdAndUpdate(req.user._id, dbQuery, function(err, data) {
+    if (err) {
+      res.status(404).json({
+        status: 'error'
+      });
+    }
+    res.json({
+      status: 'success',
+      treats: data.treats
+    });
+  });
 });
 
-app.get('/clear', function(req, res) {
-//  res.clearCookie('treat');
-  delete req.session.treat;
-  req.session.flash = {
-    type: 'negative',
-    header: 'No treat',
-    body: 'Your bag is empty'
-  };
-  res.redirect('/');
-});
+app.get('/leaders', function(req, res) {
+  if (req.user.role !== 'admin') {
+    res.status('403').send('Unauthorized')
+  } else {
+    var User = require('./models/user');
+    User.find({}, function(err, users) {
+      res.json(users);
+    });
+  }
+})
+
+// after routes but before error handlers
+app.use(express.static('public'));
 
 // start server
 app.listen(PORT, function() {

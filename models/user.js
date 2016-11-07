@@ -4,7 +4,8 @@ var passportLocalMongoose = require('passport-local-mongoose');
 
 var User = new Schema({
   role: String,
-  twitterId: String
+  twitterId: String,
+  treats: [String]
 });
 
 // plugin adds username, hash and salt for password

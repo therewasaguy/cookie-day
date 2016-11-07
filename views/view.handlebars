@@ -1,5 +1,17 @@
 <div class="ui middle aligned center aligned grid">
   <div class="column">
-    <h1 class="ui header">{{msg}}</h1>
+
+    {{#if user}}
+      <div class="row">
+        <button id="treat">
+          Trick or Treat
+        </button>
+      </div>
+    {{/if}}
+    <h1 class="ui header treats">{{treats}}</h1>
   </div>
 </div>
+
+<!-- load script from public/js -->
+<script src="/js/treat.js" defered></script>
+
